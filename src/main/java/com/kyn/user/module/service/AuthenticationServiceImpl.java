@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.kyn.user.base.dto.ResponseDto;
 import com.kyn.user.base.exception.InvalidTokenException;
@@ -24,6 +25,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import reactor.core.publisher.Mono;
 
+@Service
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final UserInfoRepository userInfoRepository;
