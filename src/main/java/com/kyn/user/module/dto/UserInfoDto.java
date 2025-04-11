@@ -14,11 +14,11 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "create")
 public class UserInfoDto {
-    private UUID id;
+    private UUID userInfoId;
     private String userId;
     private String userName;
-    private String userEmail;
-    private String userPassword;
+    private String email;
+    private String password;
     private List<UserAuthDto> userAuths;
 
     private String regrId;

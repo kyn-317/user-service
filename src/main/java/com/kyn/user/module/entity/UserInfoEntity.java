@@ -3,6 +3,7 @@ package com.kyn.user.module.entity;
 import java.util.UUID;
 
 import org.springframework.data.annotation.Id;
+
 import org.springframework.data.relational.core.mapping.Table;
 
 import com.kyn.user.base.entity.BaseDocuments;
@@ -18,17 +19,17 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "create")
-@Table(schema = "user", name = "user_info")
+@Table(schema = "user_data", name = "user_info")
 public class UserInfoEntity extends BaseDocuments {
     @Id
-    private UUID _id;
-    
+    private UUID userInfoId;
+
     private String userId;
     
     private String userName;
 
-    private String userEmail;
+    private String email;
 
-    private String userPassword;
+    private String password;
 
 }

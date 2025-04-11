@@ -9,6 +9,8 @@ import com.kyn.user.module.dto.UserAuthDto;
 import com.kyn.user.module.dto.UserEntityDtoUtil;
 import com.kyn.user.module.dto.UserInfoDto;
 import com.kyn.user.module.entity.UserAuthEntity;
+import com.kyn.user.module.entity.UserInfoEntity;
+import com.kyn.user.module.mapper.UserAuthEntityDtoMapper;
 import com.kyn.user.module.repository.UserAuthRepository;
 import com.kyn.user.module.repository.UserInfoRepository;
 import com.kyn.user.module.service.interfaces.AuthorizationService;
@@ -28,44 +30,14 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     }
 
     @Override
-    public Mono<UserInfoDto> addUserAuth(UUID userId, UserAuthDto userAuthDto) {
+    public Mono<UserAuthDto> addUserAuth(UUID userId, Role role) {
         return userInfoRepository.findById(userId)
-        .flatMap(user -> {
-                return userAuthRepository
-                                .findByUserObjectIdAndUserRole(user.get_id(),
-                                                userAuthDto.getUserRole())
-                                .flatMap(existingAuth -> {
-                                        return userAuthRepository
-                                                        .findByUserObjectId(user.get_id())
-                                                        .collectList()
-                                                        .map(auths -> UserEntityDtoUtil
-                                                                        .entityToDto(
-                                                                                        user,
-                                                                                        auths));
-                                })
-                                .switchIfEmpty(
-                                                Mono.defer(() -> {
-                                                        UserAuthEntity authEntity = new UserAuthEntity();
-                                                        authEntity.setUserObjectId(
-                                                                        user.get_id());
-                                                        authEntity.setUserEmail(
-                                                                        user.getUserEmail());
-                                                        authEntity.setUserRole(userAuthDto
-                                                                        .getUserRole());
-                                                        authEntity.insertDocument(
-                                                                        user.getUserId());
-
-                                                        return userAuthRepository
-                                                                        .save(authEntity)
-                                                                        .then(userAuthRepository
-                                                                                        .findByUserObjectId(
-                                                                                                        user.get_id())
-                                                                                        .collectList()
-                                                                                        .map(auths -> UserEntityDtoUtil
-                                                                                                        .entityToDto(user,
-                                                                                                                        auths)));
-                                                }));
-        });
+                .switchIfEmpty(Mono.error(new RuntimeException("User not found")))
+                .flatMap(user ->  userAuthRepository.findByUserInfoIdAndRole(user.getUserInfoId(), role)
+                            .map(UserAuthEntityDtoMapper::userAuthEntityToDto)
+                            .switchIfEmpty(Mono.defer(() -> 
+                                        userAuthRepository.save(UserAuthEntityDtoMapper.userAuthEntityToCreateUser(user, role))
+                                        .map(UserAuthEntityDtoMapper::userAuthEntityToDto))));
     }
 
     @Override
@@ -73,7 +45,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         return userInfoRepository.findById(userId)
         .flatMap(user -> {
 
-                return userAuthRepository.findByUserObjectId(user.get_id())
+                return userAuthRepository.findByUserInfoId(user.getUserInfoId())
                                 .collectList()
                                 .flatMap(auths -> {
 
@@ -84,11 +56,11 @@ public class AuthorizationServiceImpl implements AuthorizationService {
                                         }
 
                                         return userAuthRepository
-                                                        .deleteByUserObjectIdAndUserRole(
-                                                                        user.get_id(), role)
+                                                        .deleteByUserInfoIdAndRole(
+                                                                        user.getUserInfoId(), role)
                                                         .then(userAuthRepository
-                                                                        .findByUserObjectId(user
-                                                                                        .get_id())
+                                                                        .findByUserInfoId(user
+                                                                                        .getUserInfoId())
                                                                         .collectList()
                                                                         .map(updatedAuths -> UserEntityDtoUtil
                                                                                         .entityToDto(user,
@@ -100,7 +72,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     @Override
     public Flux<UserAuthDto> getUserAuths(UUID userId) {
         return userInfoRepository.findById(userId)
-        .flatMapMany(user -> userAuthRepository.findByUserObjectId(user.get_id())
+        .flatMapMany(user -> userAuthRepository.findByUserInfoId(user.getUserInfoId())
                         .map(UserEntityDtoUtil::authEntityToDto));
     }
     

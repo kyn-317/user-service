@@ -1,24 +1,22 @@
 package com.kyn.user.module.dto;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
-
-import com.kyn.user.base.enums.Role;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Data
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "create")
-public class UserAuthDto {
-    private UUID userAuthId;
-    private UUID userInfoId;
+@Builder
+public class UserResponseDto {
+    private String userId;
+    private String userName;
     private String email;
-    private Role role;
+    private List<UserAuthDto> userAuths;
 
     private String createdBy;
     private LocalDateTime createdAt;

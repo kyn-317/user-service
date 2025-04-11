@@ -23,7 +23,7 @@ public class GlobalErrorHandler {
     @ExceptionHandler(Exception.class)
     public Mono<ResponseEntity<ErrorResponse>> handleGenericError(Exception ex) {
         ErrorResponse response = ErrorResponse.create(
-                "",
+                ex.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "INTERNAL_SERVER_ERROR");
         return Mono.just(ResponseEntity

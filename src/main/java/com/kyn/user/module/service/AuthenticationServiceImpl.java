@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.redisson.api.RMapCacheReactive;
+import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,25 +36,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final RMapCacheReactive<String, Boolean> jwtBlacklistMap;
 
     public AuthenticationServiceImpl(UserInfoRepository userInfoRepository, UserAuthRepository userAuthRepository,
-     PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider, RMapCacheReactive<String, Boolean> jwtBlacklistMap) {
+     PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider, RedissonClient redissonClient) {
         this.userInfoRepository = userInfoRepository;
         this.userAuthRepository = userAuthRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
-        this.jwtBlacklistMap = jwtBlacklistMap;
+        this.jwtBlacklistMap = redissonClient.reactive().getMapCache("blacklist:id");
     }
 
     @Override
     public Mono<ResponseDto<String>> login(UserInfoDto userInfoDto) {
-            return userInfoRepository.findByUserEmail(userInfoDto.getUserEmail())
+            return userInfoRepository.findByEmail(userInfoDto.getEmail())
                             .switchIfEmpty(Mono.error(new UserNotFoundException()))
                             .flatMap(userInfo -> {
-                                    if (!passwordEncoder.matches(userInfoDto.getUserPassword(),
-                                                    userInfo.getUserPassword())) {
+                                    if (!passwordEncoder.matches(userInfoDto.getPassword(),
+                                                                userInfo.getPassword())) {
                                             return Mono.error(new InvalidCredentialsException());
                                     }
 
-                                    return userAuthRepository.findByUserObjectId(userInfo.get_id())
+                                    return userAuthRepository.findByUserInfoId(userInfo.getUserInfoId())
                                                     .collectList()
                                                     .flatMap(auths -> {
                                                             Authentication authentication = new UsernamePasswordAuthenticationToken(
@@ -61,7 +62,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                                                                             null,
                                                                             auths.stream()
                                                                                             .map(auth -> new SimpleGrantedAuthority(
-                                                                                                            auth.getUserRole().toString()))
+                                                                                                            auth.getRole().toString()))
                                                                                             .collect(Collectors
                                                                                                             .toList()));
 

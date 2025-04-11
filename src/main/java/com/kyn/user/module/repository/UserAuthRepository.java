@@ -13,9 +13,9 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface UserAuthRepository extends ReactiveCrudRepository<UserAuthEntity, UUID> {
-    Flux<UserAuthEntity> findByUserObjectId(UUID userObjectId);
+    Flux<UserAuthEntity> findByUserInfoId(UUID userInfoId);
 
-    Mono<UserAuthEntity> findByUserObjectIdAndUserRole(UUID userObjectId, Role userRole);
+    Mono<UserAuthEntity> findByUserInfoIdAndRole(UUID userInfoId, Role role);
 
-    Mono<Void> deleteByUserObjectIdAndUserRole(UUID userObjectId, Role userRole);
+    Mono<Void> deleteByUserInfoIdAndRole(UUID userInfoId, Role role);
 }

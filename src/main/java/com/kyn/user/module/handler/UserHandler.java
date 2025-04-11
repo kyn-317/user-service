@@ -5,6 +5,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.kyn.user.module.dto.UserInfoDto;
+import com.kyn.user.module.dto.UserRequestDto;
 import com.kyn.user.module.service.interfaces.AuthenticationService;
 import com.kyn.user.module.service.interfaces.AuthorizationService;
 import com.kyn.user.module.service.interfaces.UserService;
@@ -25,7 +26,7 @@ public class UserHandler {
     }
 
     public Mono<ServerResponse> createUser(ServerRequest request) {
-        return request.bodyToMono(UserInfoDto.class)
+        return request.bodyToMono(UserRequestDto.class)
                 .flatMap(userService::createUser)
                 .flatMap(user -> ServerResponse.ok().bodyValue(user));
     }

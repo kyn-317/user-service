@@ -16,7 +16,7 @@ public class UserEntityDtoUtil {
     public static UserInfoDto entityToDto(UserInfoEntity entity, List<UserAuthEntity> auths) {
         UserInfoDto dto = new UserInfoDto();
         BeanUtils.copyProperties(entity, dto);
-        dto.setId(entity.get_id());
+        dto.setUserInfoId(entity.getUserInfoId());
 
         if (auths != null && !auths.isEmpty()) {
             List<UserAuthDto> authDtos = auths.stream()
@@ -37,10 +37,10 @@ public class UserEntityDtoUtil {
     public static UserInfoEntity updateUserInfoEntity(UserInfoDto dto, UserInfoEntity existingUser,
             PasswordEncoder encoder) {
         // password update
-        if (dto.getUserPassword() != null
-                && !dto.getUserPassword().isEmpty()) {
-            existingUser.setUserPassword(
-                    encoder.encode(dto.getUserPassword()));
+        if (dto.getPassword() != null
+                && !dto.getPassword().isEmpty()) {
+            existingUser.setPassword(
+                    encoder.encode(dto.getPassword()));
         }
         // name update
         if (dto.getUserName() != null
@@ -48,9 +48,9 @@ public class UserEntityDtoUtil {
             existingUser.setUserName(dto.getUserName());
         }
         // email update
-        if (dto.getUserEmail() != null
-                && !dto.getUserEmail().isEmpty()) {
-            existingUser.setUserEmail(dto.getUserEmail());
+        if (dto.getEmail() != null
+                && !dto.getEmail().isEmpty()) {
+            existingUser.setEmail(dto.getEmail());
         }
         // update Document
         existingUser.updateDocument(existingUser.getUserId());
@@ -58,8 +58,8 @@ public class UserEntityDtoUtil {
     }
 
     public static UserAuthEntity createUserAuthEntity(UserInfoEntity infoEntity) {
-        UserAuthEntity authEntity = UserAuthEntity.create(null, infoEntity.get_id(),
-                infoEntity.getUserEmail(), Role.USER);
+        UserAuthEntity authEntity = UserAuthEntity.create(null, infoEntity.getUserInfoId(),
+                infoEntity.getEmail(), Role.USER);
         authEntity.insertDocument(infoEntity.getUserId());
         return authEntity;
 
@@ -69,8 +69,8 @@ public class UserEntityDtoUtil {
         UserInfoEntity entity = new UserInfoEntity();
         BeanUtils.copyProperties(dto, entity);
 
-        if (dto.getId() != null) {
-            entity.set_id(dto.getId());
+        if (dto.getUserInfoId() != null) {
+            entity.setUserInfoId(dto.getUserInfoId());
         }
 
         return entity;
@@ -80,8 +80,7 @@ public class UserEntityDtoUtil {
     public static UserAuthDto authEntityToDto(UserAuthEntity entity) {
         UserAuthDto dto = new UserAuthDto();
         BeanUtils.copyProperties(entity, dto);
-        dto.setId(entity.get_id());
-        dto.setUserObjectId(entity.getUserObjectId());
+        dto.setUserInfoId(entity.getUserInfoId());
 
         return dto;
     }
@@ -90,12 +89,12 @@ public class UserEntityDtoUtil {
         UserAuthEntity entity = new UserAuthEntity();
         BeanUtils.copyProperties(dto, entity);
 
-        if (dto.getId() != null) {
-            entity.set_id(dto.getId());
+        if (dto.getUserInfoId() != null) {
+            entity.setUserInfoId(dto.getUserInfoId());
         }
 
-        if (dto.getUserObjectId() != null) {
-            entity.setUserObjectId(dto.getUserObjectId());
+        if (dto.getUserAuthId() != null) {
+            entity.setUserAuthId(dto.getUserAuthId());
         }
 
         return entity;

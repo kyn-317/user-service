@@ -19,16 +19,17 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "create")
-@Table(schema = "user", name = "user_auth")
+@Table(schema = "user_data", name = "user_auth")
 public class UserAuthEntity extends BaseDocuments {
 
     @Id
-    private UUID _id;
+    
+    private UUID userAuthId;
 
-    private UUID userObjectId;
+    private UUID userInfoId;
 
-    private String userEmail;
+    private String email;
 
-    private Role userRole;
+    private Role role;
 
 }

@@ -10,7 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface AuthorizationService {
-    public Mono<UserInfoDto> addUserAuth(UUID userId, UserAuthDto userAuthDto);
+    public Mono<UserAuthDto> addUserAuth(UUID userId, Role role);
     public Mono<UserInfoDto> removeUserAuth(UUID userId, Role role);
     public Flux<UserAuthDto> getUserAuths(UUID userId);
 }
