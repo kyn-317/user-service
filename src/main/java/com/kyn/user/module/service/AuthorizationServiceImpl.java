@@ -11,13 +11,13 @@ import com.kyn.user.module.dto.UserInfoDto;
 import com.kyn.user.module.entity.UserAuthEntity;
 import com.kyn.user.module.repository.UserAuthRepository;
 import com.kyn.user.module.repository.UserInfoRepository;
-import com.kyn.user.module.service.interfaces.IAuthorizationService;
+import com.kyn.user.module.service.interfaces.AuthorizationService;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-public class AuthorizationServiceImpl implements IAuthorizationService {
+public class AuthorizationServiceImpl implements AuthorizationService {
 
     private final UserInfoRepository userInfoRepository;
     private final UserAuthRepository userAuthRepository;

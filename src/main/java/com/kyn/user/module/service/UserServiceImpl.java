@@ -12,12 +12,12 @@ import com.kyn.user.module.dto.UserEntityDtoUtil;
 import com.kyn.user.module.dto.UserInfoDto;
 import com.kyn.user.module.repository.UserAuthRepository;
 import com.kyn.user.module.repository.UserInfoRepository;
-import com.kyn.user.module.service.interfaces.IUserService;
+import com.kyn.user.module.service.interfaces.UserService;
 
 import reactor.core.publisher.Mono;
 
 @Service
-public class UserServiceImpl implements IUserService {
+public class UserServiceImpl implements UserService {
 
         private final UserInfoRepository userInfoRepository;
         private final UserAuthRepository userAuthRepository;

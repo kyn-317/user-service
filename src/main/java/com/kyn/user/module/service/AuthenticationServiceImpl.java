@@ -18,13 +18,13 @@ import com.kyn.user.module.exception.InvalidCredentialsException;
 import com.kyn.user.module.exception.UserNotFoundException;
 import com.kyn.user.module.repository.UserAuthRepository;
 import com.kyn.user.module.repository.UserInfoRepository;
-import com.kyn.user.module.service.interfaces.IAuthenticationService;
+import com.kyn.user.module.service.interfaces.AuthenticationService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import reactor.core.publisher.Mono;
 
-public class AuthenticationServiceImpl implements IAuthenticationService {
+public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final UserInfoRepository userInfoRepository;
     private final UserAuthRepository userAuthRepository;

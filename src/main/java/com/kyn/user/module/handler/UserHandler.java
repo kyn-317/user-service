@@ -18,7 +18,7 @@ public class UserHandler {
     private final AuthenticationService authenticationService;
     private final AuthorizationService authorizationService;
 
-    public UserHandler(IUserService userService, IAuthenticationService authenticationService, IAuthorizationService authorizationService) {
+    public UserHandler(UserService userService, AuthenticationService authenticationService, AuthorizationService authorizationService) {
         this.userService = userService;
         this.authenticationService = authenticationService;
         this.authorizationService = authorizationService;
