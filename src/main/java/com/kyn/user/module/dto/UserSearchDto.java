@@ -1,7 +1,6 @@
 package com.kyn.user.module.dto;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -10,18 +9,23 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor(staticName = "create")
 @Builder
-public class UserResponseDto {
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserSearchDto {
     private UUID userInfoId;
     private String userId;
     private String email;
     private String userName;
-    private List<UserAuthDto> userAuths;
-
     private String createdBy;
     private LocalDateTime createdAt;
     private String updatedBy;
     private LocalDateTime updatedAt;
+
+    private UUID userAuthId;
+    private String role;
+    private String uaCreatedBy;
+    private LocalDateTime uaCreatedAt;
+    private String uaUpdatedBy;
+    private LocalDateTime uaUpdatedAt;
 }

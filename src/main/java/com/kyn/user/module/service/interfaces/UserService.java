@@ -1,11 +1,6 @@
 package com.kyn.user.module.service.interfaces;
 
-import java.util.UUID;
-
 import com.kyn.user.module.dto.UserInfoDto;
-import com.kyn.user.module.dto.UserRequestDto;
-
-
 import reactor.core.publisher.Mono;
 
 public interface UserService {

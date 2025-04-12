@@ -20,7 +20,11 @@ public class UserRouter {
     public RouterFunction<ServerResponse> userRoutes() {
         return RouterFunctions.route(RequestPredicates.POST("/user/create"), this.userHandler::createUser)
                 .andRoute(RequestPredicates.POST("/user/login"), this.userHandler::login)
-                .andRoute(RequestPredicates.POST("/user/addrole"), this.userHandler::addRole);
+                .andRoute(RequestPredicates.POST("/user/addrole"), this.userHandler::addRole)
+                .andRoute(RequestPredicates.GET("/user/searchEmail/{email}"), this.userHandler::searchUserByEmail)
+                .andRoute(RequestPredicates.GET("/user/searchUserId/{userId}"), this.userHandler::searchUserByUserId)
+                .andRoute(RequestPredicates.GET("/user/searchUserName/{userName}"), this.userHandler::searchUserByUserName)
+                .andRoute(RequestPredicates.GET("/user/searchId/{id}"), this.userHandler::searchUserById);
     }
     
 }
