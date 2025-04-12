@@ -25,7 +25,10 @@ public class UserRouter {
                 .andRoute(RequestPredicates.GET("/user/searchUserId/{userId}"), this.userHandler::searchUserByUserId)
                 .andRoute(RequestPredicates.GET("/user/searchUserName/{userName}"), this.userHandler::searchUserByUserName)
                 .andRoute(RequestPredicates.GET("/user/searchId/{id}"), this.userHandler::searchUserById)
-                .andRoute(RequestPredicates.POST("/user/login"), this.userHandler::login);
+                .andRoute(RequestPredicates.POST("/user/login"), this.userHandler::login)
+                .andRoute(RequestPredicates.POST("/user/logout"), this.userHandler::logout)
+                .andRoute(RequestPredicates.POST("/user/isLogin"), this.userHandler::isLogin)
+                .andRoute(RequestPredicates.POST("/user/getExpirationTime"), this.userHandler::getExpirationTime);
     }
     
 }

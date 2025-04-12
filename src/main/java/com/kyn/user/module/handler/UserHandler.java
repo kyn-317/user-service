@@ -68,9 +68,21 @@ public class UserHandler {
                 .flatMap(user -> ServerResponse.ok().bodyValue(user));
     }
 
-    public Mono<ServerResponse> isValidUser(ServerRequest request) {
-        return request.bodyToMono(UserRequestDto.class)
-                .flatMap(userManagementService::isValidUser)
+    public Mono<ServerResponse> isLogin(ServerRequest request) {
+        return request.bodyToMono(String.class)
+                .flatMap(authenticationService::isLogin)
+                .flatMap(user -> ServerResponse.ok().bodyValue(user));
+    }
+
+    public Mono<ServerResponse> logout(ServerRequest request) {
+        return request.bodyToMono(String.class)
+                .flatMap(authenticationService::logout)
+                .flatMap(user -> ServerResponse.ok().bodyValue(user));
+    }
+
+    public Mono<ServerResponse> getExpirationTime(ServerRequest request) {
+        return request.bodyToMono(String.class)
+                .flatMap(authenticationService::getExpirationTime)
                 .flatMap(user -> ServerResponse.ok().bodyValue(user));
     }
 }

@@ -10,5 +10,5 @@ public interface AuthenticationService {
     public Mono<String> login(UserInfoDto userInfoDto);
     public Mono<ResponseDto<String>> isLogin(String token);
     public Mono<ResponseDto<String>> logout(String token);
-    
+    public Mono<ResponseDto<Long>> getExpirationTime(String token);
 }

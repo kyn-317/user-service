@@ -24,12 +24,12 @@ import java.util.stream.Collectors;
 public class JwtTokenProvider {
 
     private final SecretKey secretKey;
-    private final long tokenValidityInMilliseconds;
+    private final long tokenValidationDate;
     private static final String AUTHORITIES_KEY = "auth";
 
     public JwtTokenProvider(SecretKey secretKey, JwtConfig jwtConfig) {
         this.secretKey = secretKey;
-        this.tokenValidityInMilliseconds = jwtConfig.getExpiration() * 1000;
+        this.tokenValidationDate = jwtConfig.getExpiration();
     }
 
     public String createToken(Authentication authentication) {
@@ -38,7 +38,7 @@ public class JwtTokenProvider {
                 .collect(Collectors.joining(","));
 
         long now = (new Date()).getTime();
-        Date validity = new Date(now + this.tokenValidityInMilliseconds);
+        Date validity = new Date(now + this.tokenValidationDate);
 
         return Jwts.builder()
                 .subject(authentication.getName())
@@ -49,10 +49,13 @@ public class JwtTokenProvider {
     }
 
     public String createToken(JwtRequestDto dto) {
+        return this.createToken(dto, this.tokenValidationDate);
+    }
+    public String createToken(JwtRequestDto dto , Long expirationTime){
         return Jwts.builder()
                 .subject(dto.getEmail())
                 .claim(AUTHORITIES_KEY, dto.getAuthorities())
-                .expiration(new Date(System.currentTimeMillis() + this.tokenValidityInMilliseconds))  
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(secretKey)
                 .compact();
     }
