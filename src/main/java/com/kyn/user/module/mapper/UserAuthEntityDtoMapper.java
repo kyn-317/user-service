@@ -19,6 +19,17 @@ public class UserAuthEntityDtoMapper {
         return authEntity;
     }
 
+
+    public static UserAuthEntity userAuthEntityToCreate(UserAuthDto dto, String createdBy) {
+        UserAuthEntity authEntity = UserAuthEntity.create(
+            null,
+            dto.getUserInfoId(),
+            dto.getEmail(),
+            dto.getRole()
+        );
+        authEntity.insertDocument(createdBy);
+        return authEntity;
+    }
     public static UserAuthDto userAuthEntityToDto(UserAuthEntity authEntity) {
         return UserAuthDto.create(
             authEntity.getUserAuthId(),

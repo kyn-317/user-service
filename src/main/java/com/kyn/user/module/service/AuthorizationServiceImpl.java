@@ -6,74 +6,43 @@ import org.springframework.stereotype.Service;
 
 import com.kyn.user.base.enums.Role;
 import com.kyn.user.module.dto.UserAuthDto;
-import com.kyn.user.module.dto.UserEntityDtoUtil;
-import com.kyn.user.module.dto.UserInfoDto;
-import com.kyn.user.module.entity.UserAuthEntity;
-import com.kyn.user.module.entity.UserInfoEntity;
 import com.kyn.user.module.mapper.UserAuthEntityDtoMapper;
 import com.kyn.user.module.repository.UserAuthRepository;
-import com.kyn.user.module.repository.UserInfoRepository;
 import com.kyn.user.module.service.interfaces.AuthorizationService;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
+@Slf4j
 public class AuthorizationServiceImpl implements AuthorizationService {
 
-    private final UserInfoRepository userInfoRepository;
     private final UserAuthRepository userAuthRepository;
 
-    public AuthorizationServiceImpl(UserInfoRepository userInfoRepository, UserAuthRepository userAuthRepository) {
-            this.userInfoRepository = userInfoRepository;
+    public AuthorizationServiceImpl(UserAuthRepository userAuthRepository) {
             this.userAuthRepository = userAuthRepository;
     }
 
+    //add user auth
     @Override
-    public Mono<UserAuthDto> addUserAuth(UUID userId, Role role) {
-        return userInfoRepository.findById(userId)
-                .switchIfEmpty(Mono.error(new RuntimeException("User not found")))
-                .flatMap(user ->  userAuthRepository.findByUserInfoIdAndRole(user.getUserInfoId(), role)
-                            .map(UserAuthEntityDtoMapper::userAuthEntityToDto)
-                            .switchIfEmpty(Mono.defer(() -> 
-                                        userAuthRepository.save(UserAuthEntityDtoMapper.userAuthEntityToCreateUser(user, role))
-                                        .map(UserAuthEntityDtoMapper::userAuthEntityToDto))));
+    public Mono<UserAuthDto> addUserAuth(UserAuthDto dto) {
+        return userAuthRepository.findByUserInfoIdAndRole(dto.getUserInfoId(), dto.getRole())
+                            .switchIfEmpty(Mono.defer(() -> userAuthRepository.
+                            save(UserAuthEntityDtoMapper.userAuthEntityToCreate(dto, "system"))))
+                                        .map(UserAuthEntityDtoMapper::userAuthEntityToDto);
+    }
+    // remove user auth
+    @Override
+    public Mono<Void> removeUserAuth(UUID userId, Role role) {
+        return userAuthRepository.deleteByUserInfoIdAndRole(userId, role).then();
     }
 
-    @Override
-    public Mono<UserInfoDto> removeUserAuth(UUID userId, Role role) {
-        return userInfoRepository.findById(userId)
-        .flatMap(user -> {
-
-                return userAuthRepository.findByUserInfoId(user.getUserInfoId())
-                                .collectList()
-                                .flatMap(auths -> {
-
-                                        if (auths.size() <= 1) {
-                                                return Mono.just(UserEntityDtoUtil.entityToDto(
-                                                                user,
-                                                                auths));
-                                        }
-
-                                        return userAuthRepository
-                                                        .deleteByUserInfoIdAndRole(
-                                                                        user.getUserInfoId(), role)
-                                                        .then(userAuthRepository
-                                                                        .findByUserInfoId(user
-                                                                                        .getUserInfoId())
-                                                                        .collectList()
-                                                                        .map(updatedAuths -> UserEntityDtoUtil
-                                                                                        .entityToDto(user,
-                                                                                                        updatedAuths)));
-                                });
-        });
-    }
-
+    // get user auths
     @Override
     public Flux<UserAuthDto> getUserAuths(UUID userId) {
-        return userInfoRepository.findById(userId)
-        .flatMapMany(user -> userAuthRepository.findByUserInfoId(user.getUserInfoId())
-                        .map(UserEntityDtoUtil::authEntityToDto));
+        return userAuthRepository.findByUserInfoId(userId)
+                        .map(UserAuthEntityDtoMapper::userAuthEntityToDto);
     }
     
 }

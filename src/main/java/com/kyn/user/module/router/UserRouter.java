@@ -19,7 +19,8 @@ public class UserRouter {
     @Bean
     public RouterFunction<ServerResponse> userRoutes() {
         return RouterFunctions.route(RequestPredicates.POST("/user/create"), this.userHandler::createUser)
-                .andRoute(RequestPredicates.POST("/user/login"), this.userHandler::login);
+                .andRoute(RequestPredicates.POST("/user/login"), this.userHandler::login)
+                .andRoute(RequestPredicates.POST("/user/addrole"), this.userHandler::addRole);
     }
     
 }

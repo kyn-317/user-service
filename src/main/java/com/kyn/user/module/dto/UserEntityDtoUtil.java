@@ -9,8 +9,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.kyn.user.base.enums.Role;
 import com.kyn.user.module.entity.UserAuthEntity;
 import com.kyn.user.module.entity.UserInfoEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserEntityDtoUtil {
+
+    private static final Logger log = LoggerFactory.getLogger(UserEntityDtoUtil.class);
 
     // UserInfoEntity, userASuthEntity -> UserInfoDto 
     public static UserInfoDto entityToDto(UserInfoEntity entity, List<UserAuthEntity> auths) {
@@ -22,7 +26,6 @@ public class UserEntityDtoUtil {
             List<UserAuthDto> authDtos = auths.stream()
                     .map(UserEntityDtoUtil::authEntityToDto)
                     .collect(Collectors.toList());
-            dto.setUserAuths(authDtos);
         }
 
         return dto;
@@ -37,11 +40,6 @@ public class UserEntityDtoUtil {
     public static UserInfoEntity updateUserInfoEntity(UserInfoDto dto, UserInfoEntity existingUser,
             PasswordEncoder encoder) {
         // password update
-        if (dto.getPassword() != null
-                && !dto.getPassword().isEmpty()) {
-            existingUser.setPassword(
-                    encoder.encode(dto.getPassword()));
-        }
         // name update
         if (dto.getUserName() != null
                 && !dto.getUserName().isEmpty()) {
@@ -58,11 +56,11 @@ public class UserEntityDtoUtil {
     }
 
     public static UserAuthEntity createUserAuthEntity(UserInfoEntity infoEntity) {
+        log.debug("Creating UserAuthEntity with userInfoId: {}", infoEntity.getUserInfoId());
         UserAuthEntity authEntity = UserAuthEntity.create(null, infoEntity.getUserInfoId(),
                 infoEntity.getEmail(), Role.USER);
         authEntity.insertDocument(infoEntity.getUserId());
         return authEntity;
-
     }
 
     public static UserInfoEntity dtoToEntity(UserInfoDto dto) {

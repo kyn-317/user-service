@@ -46,7 +46,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public Mono<ResponseDto<String>> login(UserInfoDto userInfoDto) {
-            return userInfoRepository.findByEmail(userInfoDto.getEmail())
+            return Mono.empty(); /* userInfoRepository.findByEmail(userInfoDto.getEmail())
                             .switchIfEmpty(Mono.error(new UserNotFoundException()))
                             .flatMap(userInfo -> {
                                     if (!passwordEncoder.matches(userInfoDto.getPassword(),
@@ -73,7 +73,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                                                                             "loginSuccess",
                                                                             HttpStatus.OK));
                                                     });
-                            });
+                            }); */
     }
 
     @Override

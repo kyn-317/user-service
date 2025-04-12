@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.kyn.user.base.enums.Role;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -14,6 +15,7 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "create")
+@Builder
 public class UserAuthDto {
     private UUID userAuthId;
     private UUID userInfoId;
