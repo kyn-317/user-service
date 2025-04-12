@@ -52,6 +52,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .subject(dto.getEmail())
                 .claim(AUTHORITIES_KEY, dto.getAuthorities())
+                .expiration(new Date(System.currentTimeMillis() + this.tokenValidityInMilliseconds))  
                 .signWith(secretKey)
                 .compact();
     }
