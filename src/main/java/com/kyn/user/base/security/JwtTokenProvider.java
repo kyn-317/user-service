@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import com.kyn.user.base.config.JwtConfig;
+import com.kyn.user.base.dto.JwtRequestDto;
 
 import javax.crypto.SecretKey;
 import java.util.Arrays;
@@ -44,6 +45,14 @@ public class JwtTokenProvider {
                 .claim(AUTHORITIES_KEY, authorities)
                 .signWith(secretKey)
                 .expiration(validity)
+                .compact();
+    }
+
+    public String createToken(JwtRequestDto dto) {
+        return Jwts.builder()
+                .subject(dto.getEmail())
+                .claim(AUTHORITIES_KEY, dto.getAuthorities())
+                .signWith(secretKey)
                 .compact();
     }
 

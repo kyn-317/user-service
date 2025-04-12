@@ -33,10 +33,9 @@ public class UserHandler {
     }
 
     public Mono<ServerResponse> login(ServerRequest request) {
-        return Mono.empty();
-        /* request.bodyToMono(UserRequestDto.class)
-                .flatMap(authenticationService::login)
-                .flatMap(user -> ServerResponse.ok().bodyValue(user)); */
+        return request.bodyToMono(UserRequestDto.class)
+                .flatMap(userManagementService::login)
+                .flatMap(user -> ServerResponse.ok().bodyValue(user));
     }
 
     public Mono<ServerResponse> addRole(ServerRequest request) {
@@ -66,6 +65,12 @@ public class UserHandler {
     public Mono<ServerResponse> searchUserById(ServerRequest request) {
         var id = request.pathVariable("id");
         return userSearchService.findUserById(UUID.fromString(id))
+                .flatMap(user -> ServerResponse.ok().bodyValue(user));
+    }
+
+    public Mono<ServerResponse> isValidUser(ServerRequest request) {
+        return request.bodyToMono(UserRequestDto.class)
+                .flatMap(userManagementService::isValidUser)
                 .flatMap(user -> ServerResponse.ok().bodyValue(user));
     }
 }

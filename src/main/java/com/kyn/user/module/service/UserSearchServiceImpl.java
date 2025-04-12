@@ -4,16 +4,15 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.kyn.user.module.dto.AuthenticationUserDto;
 import com.kyn.user.module.dto.UserRequestDto;
 import com.kyn.user.module.dto.UserResponseDto;
-import com.kyn.user.module.dto.UserSearchDto;
 import com.kyn.user.module.mapper.UserSearchDtoMapper;
-import com.kyn.user.module.dto.UserAuthDto;
 import com.kyn.user.module.repository.UserInfoRepository;
 import com.kyn.user.module.service.interfaces.UserSearchService;
 
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
+
 import reactor.core.publisher.Mono;
 
 @Service
@@ -35,7 +34,6 @@ public class UserSearchServiceImpl implements UserSearchService {
     @Override
     public Mono<UserResponseDto> findUserByEmail(String email) {
         var dto  = UserRequestDto.builder().email(email).build();
-        log.info("findUserByEmail: {}", dto);
         return findUserByDto(dto);
     }
 
@@ -54,12 +52,7 @@ public class UserSearchServiceImpl implements UserSearchService {
     @Override
     public Mono<UserResponseDto> findUserByDto(UserRequestDto dto) {
         return Mono.just(dto)
-            .filterWhen(requestDto -> Mono.just(
-                requestDto.getUserInfoId() != null || 
-                requestDto.getUserId() != null || 
-                requestDto.getEmail() != null || 
-                requestDto.getUserName() != null
-            ))
+            .filterWhen(this::validationSearchCondition)
             .switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid Search Condition")))
             .flatMapMany(requestDto -> userInfoRepository.findByUserIdWithAuth(
                 requestDto.getUserId(),
@@ -67,6 +60,36 @@ public class UserSearchServiceImpl implements UserSearchService {
                 requestDto.getEmail(),
                 requestDto.getUserName()
             ))
-            .as(UserSearchDtoMapper::mapToUserResponseDto);
+            .collectList()
+            .flatMap(searchDtos -> {
+                if (searchDtos.isEmpty()) return Mono.empty();
+                return Mono.just(UserSearchDtoMapper.toUserResponseDto.apply(searchDtos));
+            });
+    }
+
+    @Override
+    public Mono<AuthenticationUserDto> findLoginUser(String email) {
+        var dto = UserRequestDto.builder().email(email).build();
+        return Mono.just(dto)
+        .filterWhen(this::validationSearchCondition)
+        .switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid Search Condition")))
+        .flatMapMany(requestDto -> userInfoRepository.findByUserIdWithAuthGetPassword(
+            requestDto.getUserId(),
+            requestDto.getUserInfoId(),
+            requestDto.getEmail(),
+            requestDto.getUserName()
+        ))
+        .collectList()
+        .flatMap(searchDtos -> {
+            if (searchDtos.isEmpty()) return Mono.empty();
+            return Mono.just(UserSearchDtoMapper.toAuthenticationUserDto.apply(searchDtos));
+        });
+    }
+
+    private Mono<Boolean> validationSearchCondition(UserRequestDto requestDto) {
+        return Mono.just(
+            requestDto.getUserInfoId() != null || requestDto.getUserId() != null || 
+            requestDto.getEmail() != null || requestDto.getUserName() != null
+        );
     }
 }

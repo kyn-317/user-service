@@ -18,6 +18,8 @@ public interface UserInfoRepository extends ReactiveCrudRepository<UserInfoEntit
 
     Mono<UserInfoEntity> findByUserId(String userId);
 
+    Mono<Boolean> existsByEmailAndPassword(String email, String password);
+
     @Query("""
            SELECT 
                ui.user_info_id AS user_info_id, ui.user_id AS user_id, ui.user_name AS user_name, ui.email AS email, 
@@ -37,6 +39,25 @@ public interface UserInfoRepository extends ReactiveCrudRepository<UserInfoEntit
             @Param("userInfoId") UUID userInfoId,
             @Param("email") String email,
             @Param("userName") String userName
+    );
+
+    @Query("""
+        SELECT 
+            ui.user_info_id AS user_info_id, ui.user_id AS user_id, ui.user_name AS user_name, ui.email AS email, ui.password AS password,
+            ua.user_auth_id AS user_auth_id, ua.role AS role
+        FROM 
+            user_data.user_info ui LEFT JOIN user_data.user_auth ua ON ui.user_info_id = ua.user_info_id
+        WHERE 
+            (:userId IS NULL OR ui.user_id = :userId) 
+            AND (:userInfoId IS NULL OR ui.user_info_id = :userInfoId)
+            AND (:email IS NULL OR ui.email = :email)
+            AND (:userName IS NULL OR ui.user_name = :userName)
+        """)
+    Flux<UserSearchDto> findByUserIdWithAuthGetPassword(
+             @Param("userId") String userId,
+             @Param("userInfoId") UUID userInfoId,
+             @Param("email") String email,
+             @Param("userName") String userName
     );
 
 }

@@ -1,23 +1,20 @@
 package com.kyn.user.module.service;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.kyn.user.base.dto.ResponseDto;
 import com.kyn.user.base.enums.Role;
-import com.kyn.user.module.dto.UserEntityDtoUtil;
 import com.kyn.user.module.dto.UserRequestDto;
 import com.kyn.user.module.dto.UserResponseDto;
 import com.kyn.user.module.mapper.UserInfoEntityDtoMapper;
 import com.kyn.user.module.mapper.UserManagementDtoMapper;
+import com.kyn.user.module.service.interfaces.AuthenticationService;
 import com.kyn.user.module.service.interfaces.AuthorizationService;
 import com.kyn.user.module.service.interfaces.UserManagementService;
 import com.kyn.user.module.service.interfaces.UserSearchService;
 import com.kyn.user.module.service.interfaces.UserService;
 
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
@@ -28,11 +25,13 @@ public class UserManagementServiceImpl implements UserManagementService {
     
     private final UserService userService;
     private final AuthorizationService authorizationService;
+    private final AuthenticationService authenticationService;
     private final UserSearchService userSearchService;
-    public UserManagementServiceImpl(UserService userService, AuthorizationService authorizationService, UserSearchService userSearchService) {
+    public UserManagementServiceImpl(UserService userService, AuthorizationService authorizationService, UserSearchService userSearchService, AuthenticationService authenticationService) {
         this.userService = userService;
         this.authorizationService = authorizationService;
         this.userSearchService = userSearchService;
+        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -44,7 +43,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                     authorizationService.addUserAuth(UserManagementDtoMapper.userInfoDtoToUserAuthDto(userInfo, Role.USER))
                             .map(savedAuth -> UserInfoEntityDtoMapper
                             .userInfoEntityWithAuthDtoToUserResponseDto
-                                (UserEntityDtoUtil.dtoToEntity(userInfo), Collections.singletonList(savedAuth))));
+                                (UserInfoEntityDtoMapper.dtoToEntity(userInfo), Collections.singletonList(savedAuth))));
     }
 
     @Override
@@ -71,5 +70,18 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Override
     public Mono<UserResponseDto> searchUser(UserRequestDto dto){
         return userSearchService.findUserByDto(dto);
+    }
+
+    @Override
+    public Mono<Boolean> isValidUser(UserRequestDto dto){
+        var userInfoDto = UserManagementDtoMapper.userRequestDtoToUserInfoDto(dto);
+        return userService.isValidUser(userInfoDto);
+    }
+
+    @Override
+    public Mono<String> login(UserRequestDto dto){
+        var userInfoDto = UserManagementDtoMapper.userRequestDtoToUserInfoDto(dto);
+        return authenticationService.login(userInfoDto);
+
     }
 }

@@ -2,11 +2,14 @@ package com.kyn.user.module.mapper;
 
 import java.util.Collections;
 
+import org.springframework.beans.BeanUtils;
+
 import com.kyn.user.base.enums.Role;
 import com.kyn.user.module.dto.UserAuthDto;
 import com.kyn.user.module.dto.UserInfoDto;
 import com.kyn.user.module.dto.UserRequestDto;
 import com.kyn.user.module.dto.UserResponseDto;
+import com.kyn.user.module.entity.UserInfoEntity;
 
 public class UserManagementDtoMapper {
     
@@ -50,4 +53,5 @@ public class UserManagementDtoMapper {
         .build();
 
     }
+
 }

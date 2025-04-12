@@ -17,6 +17,7 @@ public class UserSearchDto {
     private String userId;
     private String email;
     private String userName;
+    private String password;
     private String createdBy;
     private LocalDateTime createdAt;
     private String updatedBy;

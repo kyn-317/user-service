@@ -1,21 +1,26 @@
 package com.kyn.user.module.mapper;
 
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.function.Function;
+import java.util.Map;
+import java.util.UUID;
 
 import com.kyn.user.base.enums.Role;
 import com.kyn.user.module.dto.UserSearchDto;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.kyn.user.module.dto.UserResponseDto;
+import com.kyn.user.module.dto.AuthenticationUserDto;
 import com.kyn.user.module.dto.UserAuthDto;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 public class UserSearchDtoMapper {
-    
+    //setUserAuthDto
     private static final Function<UserSearchDto, UserAuthDto> toUserAuthDto = d -> {
         UserAuthDto authDto = new UserAuthDto();
         authDto.setUserAuthId(d.getUserAuthId());
@@ -29,13 +34,14 @@ public class UserSearchDtoMapper {
         return authDto;
     };
 
-    private static final Function<List<UserSearchDto>, UserResponseDto> toUserResponseDto = searchDtos -> {
+    //setUserResponseDto
+    public static final Function<List<UserSearchDto>, UserResponseDto> toUserResponseDto = searchDtos -> {
         if (searchDtos.isEmpty()) {
             return null;
-        }        
-        Map<UUID, List<UserSearchDto>> groupedByUserInfoId = searchDtos.stream()
-            .collect(Collectors.groupingBy(UserSearchDto::getUserInfoId));
-        List<UserSearchDto> userDtos = groupedByUserInfoId.values().iterator().next();
+        }
+                
+        List<UserSearchDto> userDtos =  searchDtos.stream()
+        .collect(Collectors.groupingBy(UserSearchDto::getUserInfoId)).values().iterator().next();
         UserSearchDto firstDto = userDtos.get(0);
         
         UserResponseDto responseDto = new UserResponseDto();
@@ -56,10 +62,32 @@ public class UserSearchDtoMapper {
         responseDto.setUserAuths(authDtos);
         return responseDto;
     };
-    
-    public static Mono<UserResponseDto> mapToUserResponseDto(Flux<UserSearchDto> userSearchDto) {
-        return userSearchDto
-            .collectList()
-            .map(toUserResponseDto);
-    }
+
+    public static final Function<List<UserSearchDto>, AuthenticationUserDto> toAuthenticationUserDto = searchDtos -> {
+        if (searchDtos.isEmpty()) {
+            return null;
+        }
+        
+        Map<UUID, List<UserSearchDto>> groupedByUserInfoId = searchDtos.stream()
+            .collect(Collectors.groupingBy(UserSearchDto::getUserInfoId));
+        
+        List<UserSearchDto> userDtos = groupedByUserInfoId.values().iterator().next();
+        UserSearchDto firstDto = userDtos.get(0);
+        
+        AuthenticationUserDto responseDto = new AuthenticationUserDto();
+        responseDto.setUserInfoId(firstDto.getUserInfoId());
+        responseDto.setUserId(firstDto.getUserId());
+        responseDto.setUserName(firstDto.getUserName());
+        responseDto.setEmail(firstDto.getEmail());
+        responseDto.setPassword(firstDto.getPassword());
+        
+        List<UserAuthDto> authDtos = userDtos.stream()
+            .filter(d -> d.getUserAuthId() != null)
+            .map(toUserAuthDto)
+            .collect(Collectors.toList());
+        
+        responseDto.setUserAuths(authDtos);
+        return responseDto;
+    };
+
 }

@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 
 public interface AuthenticationService {
 
-    public Mono<ResponseDto<String>> login(UserInfoDto userInfoDto);
+    public Mono<String> login(UserInfoDto userInfoDto);
     public Mono<ResponseDto<String>> isLogin(String token);
     public Mono<ResponseDto<String>> logout(String token);
     

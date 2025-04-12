@@ -1,20 +1,19 @@
 package com.kyn.user.module.service;
 
-import java.util.UUID;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.kyn.user.module.dto.UserEntityDtoUtil;
 import com.kyn.user.module.dto.UserInfoDto;
 import com.kyn.user.module.mapper.UserInfoEntityDtoMapper;
 import com.kyn.user.module.repository.UserAuthRepository;
 import com.kyn.user.module.repository.UserInfoRepository;
 import com.kyn.user.module.service.interfaces.UserService;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
         private final UserInfoRepository userInfoRepository;
@@ -43,6 +42,12 @@ public class UserServiceImpl implements UserService {
                                         UserInfoEntityDtoMapper.userInfoEntityforUpdateUser
                                                                 (user, userInfoDto, "system")))
                                 .map(UserInfoEntityDtoMapper::EntityToDto);
+        }
+
+        @Override
+        public Mono<Boolean> isValidUser(UserInfoDto userInfoDto) {
+                userInfoDto.setPassword(passwordEncoder.encode(userInfoDto.getPassword()));
+            return userInfoRepository.existsByEmailAndPassword(userInfoDto.getEmail(), userInfoDto.getPassword());
         }
 
 

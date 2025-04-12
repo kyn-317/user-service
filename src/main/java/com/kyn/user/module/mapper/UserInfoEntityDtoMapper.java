@@ -3,9 +3,10 @@ package com.kyn.user.module.mapper;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.BeanUtils;
+
 import com.kyn.user.module.dto.UserAuthDto;
 import com.kyn.user.module.dto.UserInfoDto;
-import com.kyn.user.module.dto.UserRequestDto;
 import com.kyn.user.module.dto.UserResponseDto;
 import com.kyn.user.module.entity.UserAuthEntity;
 import com.kyn.user.module.entity.UserInfoEntity;
@@ -23,6 +24,13 @@ public class UserInfoEntityDtoMapper {
         );
         userInfoEntity.insertDocument(createdBy);
         return userInfoEntity;
+    }
+
+    //dto to entity
+    public static UserInfoEntity dtoToEntity(UserInfoDto dto) {
+        UserInfoEntity entity = new UserInfoEntity();
+        BeanUtils.copyProperties(dto, entity);
+        return entity;
     }
 
     //update user info when data is not null and not empty

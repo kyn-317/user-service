@@ -24,7 +24,8 @@ public class UserRouter {
                 .andRoute(RequestPredicates.GET("/user/searchEmail/{email}"), this.userHandler::searchUserByEmail)
                 .andRoute(RequestPredicates.GET("/user/searchUserId/{userId}"), this.userHandler::searchUserByUserId)
                 .andRoute(RequestPredicates.GET("/user/searchUserName/{userName}"), this.userHandler::searchUserByUserName)
-                .andRoute(RequestPredicates.GET("/user/searchId/{id}"), this.userHandler::searchUserById);
+                .andRoute(RequestPredicates.GET("/user/searchId/{id}"), this.userHandler::searchUserById)
+                .andRoute(RequestPredicates.POST("/user/login"), this.userHandler::login);
     }
     
 }
