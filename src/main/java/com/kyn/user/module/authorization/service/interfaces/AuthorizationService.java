@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono;
 public interface AuthorizationService {
 
     public Mono<UserAuthDto> addUserAuth(UserAuthDto dto);
+    public Mono<UserAuthDto> addUserRole(UserAuthDto dto, Role role);
     public Mono<Void> removeUserAuth(UUID userId, Role role);
     public Flux<UserAuthDto> getUserAuths(UUID userId);
 

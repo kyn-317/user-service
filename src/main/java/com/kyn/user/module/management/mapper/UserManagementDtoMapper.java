@@ -30,6 +30,7 @@ public class UserManagementDtoMapper {
 
     public static UserResponseDto userInfoDtoToUserResponseDto(UserInfoDto userInfoDto) {
         return UserResponseDto.builder()
+                .userInfoId(userInfoDto.getUserInfoId())
                 .userId(userInfoDto.getUserId())
                 .userName(userInfoDto.getUserName())
                 .email(userInfoDto.getEmail())

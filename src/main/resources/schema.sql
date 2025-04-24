@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS user_data.user_auth (
     updated_by VARCHAR(255),
     updated_at TIMESTAMP
 );
-/* 
+
 -- 테이블이 있다면 데이터 삭제 (외래 키를 가진 테이블부터 삭제)
-TRUNCATE TABLE user_data.user_auth;
-TRUNCATE TABLE user_data.user_info;  */
+TRUNCATE TABLE user_data.user_auth CASCADE;
+TRUNCATE TABLE user_data.user_info CASCADE; 

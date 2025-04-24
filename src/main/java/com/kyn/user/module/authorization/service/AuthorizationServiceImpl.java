@@ -44,5 +44,14 @@ public class AuthorizationServiceImpl implements AuthorizationService {
                         .map(UserAuthEntityDtoMapper::userAuthEntityToDto);
     }
 
+    // add user role
+    @Override
+    public Mono<UserAuthDto> addUserRole(UserAuthDto dto, Role role) {
+        return addUserAuth(UserAuthDto.builder()
+                .userInfoId(dto.getUserInfoId())
+                .role(role)
+                .build());
+    }
+
 
 }

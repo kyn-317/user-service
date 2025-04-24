@@ -78,6 +78,7 @@ public class UserInfoEntityDtoMapper {
 
     public static UserResponseDto userInfoEntityWithAuthDtoToUserResponseDto(UserInfoEntity entity, List<UserAuthDto> authsDto) {
         return UserResponseDto.builder()
+        .userInfoId(entity.getUserInfoId())
         .userId(entity.getUserId())
         .userName(entity.getUserName())
         .email(entity.getEmail())
