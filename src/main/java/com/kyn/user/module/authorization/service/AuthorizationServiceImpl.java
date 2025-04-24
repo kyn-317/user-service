@@ -10,19 +10,18 @@ import com.kyn.user.module.authentication.repository.UserAuthRepository;
 import com.kyn.user.module.authorization.dto.UserAuthDto;
 import com.kyn.user.module.authorization.service.interfaces.AuthorizationService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AuthorizationServiceImpl implements AuthorizationService {
 
     private final UserAuthRepository userAuthRepository;
 
-    public AuthorizationServiceImpl(UserAuthRepository userAuthRepository) {
-            this.userAuthRepository = userAuthRepository;
-    }
 
     //add user auth
     @Override
@@ -44,5 +43,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         return userAuthRepository.findByUserInfoId(userId)
                         .map(UserAuthEntityDtoMapper::userAuthEntityToDto);
     }
-    
+
+
 }
