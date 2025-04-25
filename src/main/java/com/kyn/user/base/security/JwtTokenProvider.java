@@ -1,8 +1,8 @@
 package com.kyn.user.base.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,82 +11,53 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
-import com.kyn.user.base.config.JwtConfig;
-import com.kyn.user.base.dto.JwtRequestDto;
+import com.kyn.commonjwt.dto.TokenRequest;
+import com.kyn.commonjwt.service.JwtService;
 
-import javax.crypto.SecretKey;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.stream.Collectors;
+import io.jsonwebtoken.Claims;
 
 @Component
 public class JwtTokenProvider {
 
-    private final SecretKey secretKey;
-    private final long tokenValidationDate;
-    private static final String AUTHORITIES_KEY = "auth";
-
-    public JwtTokenProvider(SecretKey secretKey, JwtConfig jwtConfig) {
-        this.secretKey = secretKey;
-        this.tokenValidationDate = jwtConfig.getExpiration();
+    private final JwtService jwtService;
+    public JwtTokenProvider(JwtService jwtService) {
+        this.jwtService = jwtService;
     }
 
     public String createToken(Authentication authentication) {
-        String authorities = authentication.getAuthorities().stream()
+        List<String> authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
+                .collect(Collectors.toList());
+        return jwtService.generateJustToken(
+            TokenRequest.builder()
+                        .roles(authorities)
+                        .subject(authentication.getName()).build());
+     }
 
-        long now = (new Date()).getTime();
-        Date validity = new Date(now + this.tokenValidationDate);
-
-        return Jwts.builder()
-                .subject(authentication.getName())
-                .claim(AUTHORITIES_KEY, authorities)
-                .signWith(secretKey)
-                .expiration(validity)
-                .compact();
-    }
-
-    public String createToken(JwtRequestDto dto) {
-        return this.createToken(dto, this.tokenValidationDate);
-    }
-    public String createToken(JwtRequestDto dto , Long expirationTime){
-        return Jwts.builder()
-                .subject(dto.getEmail())
-                .claim(AUTHORITIES_KEY, dto.getAuthorities())
-                .expiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(secretKey)
-                .compact();
+    public String createToken(TokenRequest request) {
+        return jwtService.generateJustToken(request);
     }
 
     public Authentication getAuthentication(String token) {
-        Jws<Claims> claims = Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token);
+        Claims claims = jwtService.getClaims(token);
 
-        Collection<? extends GrantedAuthority> authorities = Arrays
-                .stream(claims.getPayload().get(AUTHORITIES_KEY).toString().split(","))
+        Collection<? extends GrantedAuthority> authorities = 
+                jwtService.getRoles(token)
+                .stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
-        User principal = new User(claims.getPayload().getSubject(), "", authorities);
+        User principal = new User(claims.getSubject(), "", authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
     public boolean validateToken(String token) {
-        try {
-            Jwts.parser().verifyWith(secretKey).build().parse(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+       return jwtService.validateToken(token);
     }
 
-    public Jws<Claims> getClaims(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
+    public Claims getClaims(String token) {
+        return jwtService.getClaims(token);
     }
 
 }

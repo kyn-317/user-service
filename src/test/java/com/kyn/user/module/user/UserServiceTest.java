@@ -33,6 +33,12 @@ public class UserServiceTest {
     void setUp() {
         userAuthRepository.deleteAll().subscribe();
         userInfoRepository.deleteAll().subscribe();
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

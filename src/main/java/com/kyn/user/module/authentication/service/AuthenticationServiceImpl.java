@@ -7,18 +7,19 @@ import java.util.stream.Collectors;
 import org.redisson.api.RMapCacheReactive;
 import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.kyn.user.base.dto.JwtRequestDto;
+import com.kyn.commonjwt.dto.TokenRequest;
 import com.kyn.user.base.dto.ResponseDto;
 import com.kyn.user.base.exception.InvalidCredentialsException;
 import com.kyn.user.base.exception.InvalidTokenException;
 import com.kyn.user.base.security.JwtTokenProvider;
 import com.kyn.user.module.authentication.service.interfaces.AuthenticationService;
-import com.kyn.user.module.user.service.interfaces.UserSearchService;
 import com.kyn.user.module.user.dto.UserInfoDto;
+import com.kyn.user.module.user.service.interfaces.UserSearchService;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -52,8 +53,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 List<SimpleGrantedAuthority> authorities = authenticationUserDto.getUserAuths().stream()
                 .map(auth -> new SimpleGrantedAuthority("ROLE_" + auth.getRole().name()))
                 .collect(Collectors.toList());
-                var jwtRequestDto = JwtRequestDto.create(authenticationUserDto.getEmail(), authorities);
-                return Mono.<String>just(jwtTokenProvider.createToken(jwtRequestDto));
+                var jwtRequest = TokenRequest.builder()
+                .roles(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                .subject(authenticationUserDto.getEmail()).build();
+                return Mono.<String>just(jwtTokenProvider.createToken(jwtRequest));
         });
     }
 
@@ -79,10 +82,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     return Mono.error(new InvalidTokenException());
             }
 
-            log.info("token: {}", jwtTokenProvider.getClaims(token).getPayload().getExpiration().getTime()
+            log.info("token: {}", jwtTokenProvider.getClaims(token).getExpiration().getTime()
             - System.currentTimeMillis());
             return jwtBlacklistMap.fastPut(token, true,
-                         jwtTokenProvider.getClaims(token).getPayload().getExpiration().getTime()
+                         jwtTokenProvider.getClaims(token).getExpiration().getTime()
                           - System.currentTimeMillis(), TimeUnit.MILLISECONDS)
                         .map(result -> ResponseDto.create("SUCCESS LOGOUT", "logout success", HttpStatus.OK));
     }
