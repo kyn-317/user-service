@@ -6,6 +6,6 @@ import org.springframework.http.HttpStatus;
 
 public class InvalidCredentialsException extends GeneralException {
     public InvalidCredentialsException() {
-        super("Invalid Credentials", HttpStatus.UNAUTHORIZED);
+        super("Invalid Credentials", HttpStatus.UNAUTHORIZED,401);
     }
 }

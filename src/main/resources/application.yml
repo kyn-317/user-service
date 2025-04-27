@@ -1,0 +1,18 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/kynpost
+    username: kynpostgres
+    password: kynpostgrespw
+  data:
+    redis:
+      host: localhost
+      port: 6379
+    r2dbc:
+      repositories:
+        enabled: true
+    
+server:
+  port: 8080
+
+jwt:
+  secret: afa3ae3cd6a86723abbf3b11bb031a1750a71879efa01ba6cd34bc8e29688835

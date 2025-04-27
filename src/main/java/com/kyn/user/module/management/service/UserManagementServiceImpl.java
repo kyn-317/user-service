@@ -5,7 +5,9 @@ import java.util.Collections;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kyn.commonjwt.dto.TokenDto;
 import com.kyn.user.base.enums.Role;
+import com.kyn.user.base.exception.AlreadySignedUserException;
 import com.kyn.user.module.management.dto.UserRequestDto;
 import com.kyn.user.module.management.dto.UserResponseDto;
 import com.kyn.user.module.management.mapper.UserManagementDtoMapper;
@@ -38,12 +40,16 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Transactional
     public Mono<UserResponseDto> createUser(UserRequestDto dto) {
         var userInfoDto = UserManagementDtoMapper.userRequestDtoToUserInfoDto(dto);
-        return userService.createUser(userInfoDto)
-                .flatMap(userInfo -> 
+        return userSearchService.isExistUser(userInfoDto.getEmail())
+            .flatMap(isExist -> {
+                if (isExist) return Mono.error(new AlreadySignedUserException());
+                return userService.createUser(userInfoDto)
+                    .flatMap(userInfo -> 
                     authorizationService.addUserAuth(UserManagementDtoMapper.userInfoDtoToUserAuthDto(userInfo, Role.USER))
                             .map(savedAuth -> UserInfoEntityDtoMapper
                             .userInfoEntityWithAuthDtoToUserResponseDto
                                 (UserInfoEntityDtoMapper.dtoToEntity(userInfo), Collections.singletonList(savedAuth))));
+            });
     }
 
     @Override
@@ -79,7 +85,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public Mono<String> login(UserRequestDto dto){
+    public Mono<TokenDto> login(UserRequestDto dto){
         var userInfoDto = UserManagementDtoMapper.userRequestDtoToUserInfoDto(dto);
         return authenticationService.login(userInfoDto);
 

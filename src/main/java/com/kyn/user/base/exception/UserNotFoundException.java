@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 
 public class UserNotFoundException extends GeneralException {
     public UserNotFoundException() {
-        super("user not found", HttpStatus.NOT_FOUND);
+        super("user not found", HttpStatus.NOT_FOUND,404);
     }
 }

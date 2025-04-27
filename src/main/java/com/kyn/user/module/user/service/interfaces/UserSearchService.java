@@ -15,6 +15,7 @@ public interface UserSearchService {
     public Mono<UserResponseDto> findUserByUserId(String userId);
     public Mono<UserResponseDto> findUserByUserName(String userName);
     public Mono<UserResponseDto> findUserByDto(UserRequestDto dto);
+    public Mono<Boolean> isExistUser(String email);
     public Mono<AuthenticationUserDto> findLoginUser(String email); 
     
 }

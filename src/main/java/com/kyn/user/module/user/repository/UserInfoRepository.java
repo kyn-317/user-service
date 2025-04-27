@@ -61,4 +61,6 @@ public interface UserInfoRepository extends ReactiveCrudRepository<UserInfoEntit
              @Param("userName") String userName
     );
 
+    Mono<Boolean> existsByEmail(String email);
+
 }

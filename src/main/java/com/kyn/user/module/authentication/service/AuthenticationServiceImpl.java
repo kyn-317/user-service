@@ -12,7 +12,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.kyn.commonjwt.dto.TokenDto;
 import com.kyn.commonjwt.dto.TokenRequest;
+import com.kyn.commonjwt.service.JwtService;
 import com.kyn.user.base.dto.ResponseDto;
 import com.kyn.user.base.exception.InvalidCredentialsException;
 import com.kyn.user.base.exception.InvalidTokenException;
@@ -31,18 +33,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final UserSearchService userSearchService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final JwtService jwtService;
     private final RMapCacheReactive<String, Boolean> jwtBlacklistMap;
 
     public AuthenticationServiceImpl( PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
-                                 RedissonClient redissonClient, UserSearchService userSearchService) {
+                                 RedissonClient redissonClient, UserSearchService userSearchService, JwtService jwtService) {
         this.passwordEncoder = passwordEncoder;
         this.userSearchService = userSearchService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.jwtService = jwtService;
         this.jwtBlacklistMap = redissonClient.reactive().getMapCache("blacklist:id");
     }
 
     @Override
-    public Mono<String> login(UserInfoDto userInfoDto) {
+    public Mono<TokenDto> login(UserInfoDto userInfoDto) {
         return userSearchService.findLoginUser(userInfoDto.getEmail())
             .switchIfEmpty(Mono.error(new InvalidCredentialsException()))
             .flatMap(authenticationUserDto -> {
@@ -51,13 +55,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 }
 
                 List<SimpleGrantedAuthority> authorities = authenticationUserDto.getUserAuths().stream()
-                .map(auth -> new SimpleGrantedAuthority("ROLE_" + auth.getRole().name()))
-                .collect(Collectors.toList());
+                    .map(auth -> new SimpleGrantedAuthority("ROLE_" + auth.getRole().name()))
+                    .collect(Collectors.toList());
                 var jwtRequest = TokenRequest.builder()
-                .roles(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                .subject(authenticationUserDto.getEmail()).build();
-                return Mono.<String>just(jwtTokenProvider.createToken(jwtRequest));
-        });
+                    .roles(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                    .subject(authenticationUserDto.getEmail())
+                    .build();
+                return Mono.just(jwtService.generateToken(jwtRequest));
+            });
     }
 
     @Override

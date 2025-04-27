@@ -4,7 +4,7 @@ CREATE SCHEMA IF NOT EXISTS user_data;
 -- 테이블이 없는 경우 생성
 CREATE TABLE IF NOT EXISTS user_data.user_info (
     user_info_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id VARCHAR(255) NOT NULL UNIQUE,
+    user_id VARCHAR(255) NOT NULL,
     user_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,

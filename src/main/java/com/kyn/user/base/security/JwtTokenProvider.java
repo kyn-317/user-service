@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
+import com.kyn.commonjwt.dto.TokenDto;
 import com.kyn.commonjwt.dto.TokenRequest;
 import com.kyn.commonjwt.service.JwtService;
 
@@ -24,15 +25,7 @@ public class JwtTokenProvider {
         this.jwtService = jwtService;
     }
 
-    public String createToken(Authentication authentication) {
-        List<String> authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-        return jwtService.generateJustToken(
-            TokenRequest.builder()
-                        .roles(authorities)
-                        .subject(authentication.getName()).build());
-     }
+
 
     public String createToken(TokenRequest request) {
         return jwtService.generateJustToken(request);

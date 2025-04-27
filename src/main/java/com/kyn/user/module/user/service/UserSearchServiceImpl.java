@@ -91,4 +91,9 @@ public class UserSearchServiceImpl implements UserSearchService {
             requestDto.getEmail() != null || requestDto.getUserName() != null
         );
     }
+
+    @Override
+    public Mono<Boolean> isExistUser(String email) {
+        return userInfoRepository.existsByEmail(email);
+    }
 }
