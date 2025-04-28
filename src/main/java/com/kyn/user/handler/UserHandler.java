@@ -9,15 +9,17 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.kyn.user.module.management.dto.UserRequestDto;
-import com.kyn.user.module.management.dto.UserResponseDto;
 import com.kyn.user.module.management.service.interfaces.UserManagementService;
 import com.kyn.user.module.authentication.service.interfaces.AuthenticationService;
 import com.kyn.user.module.user.service.interfaces.UserSearchService;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 public class UserHandler {
+
 
     private final AuthenticationService authenticationService;
     private final UserManagementService userManagementService;
@@ -48,7 +50,7 @@ public class UserHandler {
                             .build();
                     return ServerResponse.ok()
                             .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                            .bodyValue(user.getAccessToken());
+                            .bodyValue(user);
                 });
     }
 
@@ -83,8 +85,10 @@ public class UserHandler {
     }
 
     public Mono<ServerResponse> isLogin(ServerRequest request) {
-        return request.bodyToMono(String.class)
-                .flatMap(authenticationService::isLogin)
+        log.info("headers :{} ", request.headers().toString());
+        String accessToken = request.headers().firstHeader(HttpHeaders.AUTHORIZATION).substring(7);
+        log.info("accessToken :{} ", accessToken);
+        return authenticationService.isLogin(accessToken)
                 .flatMap(user -> ServerResponse.ok().bodyValue(user));
     }
 
@@ -111,4 +115,5 @@ public class UserHandler {
                 .flatMap(authenticationService::getExpirationTime)
                 .flatMap(user -> ServerResponse.ok().bodyValue(user));
     }
+
 }

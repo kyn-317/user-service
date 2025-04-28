@@ -19,6 +19,7 @@ import com.kyn.user.base.dto.ResponseDto;
 import com.kyn.user.base.exception.InvalidCredentialsException;
 import com.kyn.user.base.exception.InvalidTokenException;
 import com.kyn.user.base.security.JwtTokenProvider;
+import com.kyn.user.module.authentication.dto.UserResponseDto;
 import com.kyn.user.module.authentication.service.interfaces.AuthenticationService;
 import com.kyn.user.module.user.dto.UserInfoDto;
 import com.kyn.user.module.user.service.interfaces.UserSearchService;
@@ -33,15 +34,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final UserSearchService userSearchService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final JwtService jwtService;
     private final RMapCacheReactive<String, Boolean> jwtBlacklistMap;
 
     public AuthenticationServiceImpl( PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
-                                 RedissonClient redissonClient, UserSearchService userSearchService, JwtService jwtService) {
+                                 RedissonClient redissonClient, UserSearchService userSearchService) {
         this.passwordEncoder = passwordEncoder;
         this.userSearchService = userSearchService;
         this.jwtTokenProvider = jwtTokenProvider;
-        this.jwtService = jwtService;
         this.jwtBlacklistMap = redissonClient.reactive().getMapCache("blacklist:id");
     }
 
@@ -61,12 +60,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .roles(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                     .subject(authenticationUserDto.getEmail())
                     .build();
-                return Mono.just(jwtService.generateToken(jwtRequest));
+                return Mono.just(jwtTokenProvider.createToken(jwtRequest));
             });
     }
 
     @Override
-    public Mono<ResponseDto<String>> isLogin(String token) {
+    public Mono<UserResponseDto> isLogin(String token) {
+        log.info("token: {}", token);
         return Mono.just(token)
             .flatMap(t -> {
                 if (!jwtTokenProvider.validateToken(t)) {
@@ -75,47 +75,42 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 return jwtBlacklistMap.get(t)
                     .flatMap(isBlacklisted -> {
                         if (Boolean.TRUE.equals(isBlacklisted)) return Mono.error(new InvalidTokenException());
-                        return Mono.just(ResponseDto.create("LOGIN", "login success", HttpStatus.OK));
+                        return getUser(token);
                     })
-                    .defaultIfEmpty(ResponseDto.create("LOGIN", "login success", HttpStatus.OK));
+                    .switchIfEmpty(getUser(token));
+            });
+    }
+
+    private Mono<UserResponseDto> getUser(String token){
+        return userSearchService.findLoginUser(jwtTokenProvider.getClaims(token).getSubject())
+            .map(user -> new UserResponseDto(user.getUserName(), user.getEmail()));
+    }
+
+    @Override
+    public Mono<String> logout(String token) {
+        return Mono.just(token)
+            .filter(jwtTokenProvider::validateToken)
+            .switchIfEmpty(Mono.error(new InvalidTokenException()))
+            .flatMap(validToken -> {
+                long expirationTimeMillis = jwtTokenProvider.getClaims(validToken).getExpiration().getTime() - System.currentTimeMillis();
+                return jwtBlacklistMap.fastPut(validToken, true, expirationTimeMillis, TimeUnit.MILLISECONDS)
+                    .map(result -> "SUCCESS LOGOUT");
             });
     }
 
     @Override
-    public Mono<ResponseDto<String>> logout(String token) {
-            if (!jwtTokenProvider.validateToken(token)) {
-                    return Mono.error(new InvalidTokenException());
-            }
-
-            log.info("token: {}", jwtTokenProvider.getClaims(token).getExpiration().getTime()
-            - System.currentTimeMillis());
-            return jwtBlacklistMap.fastPut(token, true,
-                         jwtTokenProvider.getClaims(token).getExpiration().getTime()
-                          - System.currentTimeMillis(), TimeUnit.MILLISECONDS)
-                        .map(result -> ResponseDto.create("SUCCESS LOGOUT", "logout success", HttpStatus.OK));
-    }
-
-    @Override
-    public Mono<ResponseDto<Long>> getExpirationTime(String token) {
+    public Mono<Long> getExpirationTime(String token) {
         return Mono.just(token)
             .flatMap(t -> jwtBlacklistMap.remainTimeToLive(t)
                 .flatMap(ttl -> {
                     if (ttl > 0) {
-                        // ttl이 있으면 블랙리스트에 있는 토큰
+                        // if has ttl, token is blacklisted
                         log.debug("Token is blacklisted and will expire in {} seconds", ttl);
-                        return Mono.just(ResponseDto.create(
-                            ttl, 
-                            "블랙리스트에 있는 토큰의 남은 만료 시간(초)", 
-                            HttpStatus.OK
-                        ));
+                        return Mono.just(ttl);
                     } else {
-                        // ttl이 없으면 블랙리스트에 없거나 이미 만료된 토큰
+                        // if ttl is 0, token is not in blacklist or already expired
                         log.debug("Token is not in blacklist or already expired");
-                        return Mono.just(ResponseDto.create(
-                            0L, 
-                            "토큰이 블랙리스트에 없거나 이미 만료됨", 
-                            HttpStatus.OK
-                        ));
+                        return Mono.just(0L);
                     }
                 })
             );
