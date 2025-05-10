@@ -29,11 +29,23 @@ public interface UserInfoRepository extends ReactiveCrudRepository<UserInfoEntit
                ua.updated_by AS ua_updated_by, ua.updated_at AS ua_updated_at
            FROM 
                user_data.user_info ui LEFT JOIN user_data.user_auth ua ON ui.user_info_id = ua.user_info_id
-           WHERE 
-               (:userId IS NULL OR ui.user_id = :userId) 
-               AND (:userInfoId IS NULL OR ui.user_info_id = :userInfoId)
-               AND (:email IS NULL OR ui.email = :email)
-               AND (:userName IS NULL OR ui.user_name = :userName)
+           WHERE 1=1
+               AND CASE 
+                   WHEN :userId IS NOT NULL THEN ui.user_id = :userId
+                   ELSE true
+               END
+               AND CASE 
+                   WHEN :userInfoId IS NOT NULL THEN ui.user_info_id = :userInfoId
+                   ELSE true
+               END
+               AND CASE 
+                   WHEN :email IS NOT NULL THEN ui.email = :email
+                   ELSE true
+               END
+               AND CASE 
+                   WHEN :userName IS NOT NULL THEN ui.user_name = :userName
+                   ELSE true
+               END
            """)
     Flux<UserSearchDto> findByUserIdWithAuth(
             @Param("userId") String userId,
@@ -48,11 +60,23 @@ public interface UserInfoRepository extends ReactiveCrudRepository<UserInfoEntit
             ua.user_auth_id AS user_auth_id, ua.role AS role
         FROM 
             user_data.user_info ui LEFT JOIN user_data.user_auth ua ON ui.user_info_id = ua.user_info_id
-        WHERE 
-            (:userId IS NULL OR ui.user_id = :userId) 
-            AND (:userInfoId IS NULL OR ui.user_info_id = :userInfoId)
-            AND (:email IS NULL OR ui.email = :email)
-            AND (:userName IS NULL OR ui.user_name = :userName)
+        WHERE 1=1
+            AND CASE 
+                WHEN :userId IS NOT NULL THEN ui.user_id = :userId
+                ELSE true
+            END
+            AND CASE 
+                WHEN :userInfoId IS NOT NULL THEN ui.user_info_id = :userInfoId
+                ELSE true
+            END
+            AND CASE 
+                WHEN :email IS NOT NULL THEN ui.email = :email
+                ELSE true
+            END
+            AND CASE 
+                WHEN :userName IS NOT NULL THEN ui.user_name = :userName
+                ELSE true
+            END
         """)
     Flux<UserSearchDto> findByUserIdWithAuthGetPassword(
              @Param("userId") String userId,

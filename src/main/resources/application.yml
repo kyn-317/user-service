@@ -3,6 +3,9 @@ spring:
     url: r2dbc:postgresql://localhost:5432/kynpost
     username: kynpostgres
     password: kynpostgrespw
+  sql:
+    init:
+      mode: always
   data:
     redis:
       host: localhost
@@ -10,7 +13,16 @@ spring:
     r2dbc:
       repositories:
         enabled: true
-    
+logging:
+  level:
+    # Set root logging level to INFO
+    root: INFO
+    # Set specific package logging levels if needed
+    com.kyn.user: INFO
+    io.r2dbc.postgresql.QUERY: DEBUG
+    io.r2dbc.postgresql.PARAM: DEBUG
+    org.springframework.r2dbc: DEBUG
+    org.springframework.data.r2dbc: DEBUG
 server:
   port: 8080
 

@@ -40,7 +40,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     // get user auths
     @Override
     public Flux<UserAuthDto> getUserAuths(UUID userId) {
+        log.info("getUserAuths :{} ", userId);
         return userAuthRepository.findByUserInfoId(userId)
+                        .switchIfEmpty(Mono.error(new RuntimeException("User not found")))
                         .map(UserAuthEntityDtoMapper::userAuthEntityToDto);
     }
 

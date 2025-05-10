@@ -3,6 +3,7 @@ package com.kyn.user.handler;
 import java.util.UUID;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -57,7 +58,11 @@ public class UserHandler {
     public Mono<ServerResponse> addRole(ServerRequest request) {
         return request.bodyToMono(UserRequestDto.class)
                 .flatMap(userManagementService::addRole)
-                .flatMap(user -> ServerResponse.ok().bodyValue(user));
+                .flatMap(user -> ServerResponse.ok().bodyValue(user))
+                .onErrorResume(e -> {
+                    log.error("Error adding role: {}", e.getMessage());
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValue(e.getMessage());
+                });
     }
 
     public Mono<ServerResponse> searchUserByEmail(ServerRequest request) {
@@ -93,8 +98,14 @@ public class UserHandler {
     }
 
     public Mono<ServerResponse> logout(ServerRequest request) {
-        return request.bodyToMono(String.class)
-                .flatMap(authenticationService::logout)
+        log.info("headers :{} ", request.headers().toString());
+        String authHeader = request.headers().firstHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ServerResponse.badRequest().bodyValue("Authorization header is missing or invalid");
+        }
+        String accessToken = authHeader.substring(7);
+        log.info("accessToken :{} ", accessToken);
+        return authenticationService.logout(accessToken)
                 .flatMap(user -> {
                     // Clear refresh token cookie
                     ResponseCookie clearCookie = ResponseCookie.from("refreshToken", "")

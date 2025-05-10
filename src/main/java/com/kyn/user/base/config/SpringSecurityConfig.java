@@ -16,6 +16,9 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import com.kyn.user.base.security.JwtAuthenticationFilter;
 import com.kyn.user.base.security.JwtTokenProvider;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Configuration
 @EnableWebFluxSecurity
 public class SpringSecurityConfig {
@@ -27,6 +30,11 @@ public class SpringSecurityConfig {
     }
 
     @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(tokenProvider);
+    }
+
+    @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
@@ -34,15 +42,16 @@ public class SpringSecurityConfig {
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
                 .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll())
-                .addFilterAt(new JwtAuthenticationFilter(tokenProvider), SecurityWebFiltersOrder.HTTP_BASIC)
+                .addFilterAt(jwtAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        log.info("corsConfigurationSource");
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000","http://localhost:8070"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList(
             "Authorization",

@@ -1,6 +1,7 @@
 package com.kyn.user.module.management.service;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,8 +63,10 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Override
     public Mono<UserResponseDto> addRole(UserRequestDto dto){
         var userAuthDto = UserManagementDtoMapper.userRequestDtoToUserAuthDto(dto);
-        return authorizationService.addUserAuth(userAuthDto)
-                .then(Mono.empty());
+        return userSearchService.isExistUser(userAuthDto.getUserInfoId().toString())
+        .switchIfEmpty(Mono.error(new RuntimeException("User not found")))
+        .flatMap(isExist -> authorizationService.addUserAuth(userAuthDto)
+        .then(userSearchService.findUserByUserInfoId(userAuthDto.getUserInfoId())));
     }
 
     @Override

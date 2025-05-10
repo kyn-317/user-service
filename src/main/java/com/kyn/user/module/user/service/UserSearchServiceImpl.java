@@ -43,6 +43,12 @@ public class UserSearchServiceImpl implements UserSearchService {
     }
 
     @Override
+    public Mono<UserResponseDto> findUserByUserInfoId(UUID userInfoId) {
+        var dto  = UserRequestDto.builder().userInfoId(userInfoId).build();
+        return findUserByDto(dto);
+    }
+
+    @Override
     public Mono<UserResponseDto> findUserByUserName(String userName) {
         var dto  = UserRequestDto.builder().userName(userName).build();
         return findUserByDto(dto);
@@ -60,6 +66,7 @@ public class UserSearchServiceImpl implements UserSearchService {
                 requestDto.getUserName()
             ))
             .collectList()
+            .doOnNext(searchDtos -> log.info("searchDtos :{} ", searchDtos))
             .flatMap(searchDtos -> {
                 if (searchDtos.isEmpty()) return Mono.empty();
                 return Mono.just(UserSearchDtoMapper.toUserResponseDto.apply(searchDtos));

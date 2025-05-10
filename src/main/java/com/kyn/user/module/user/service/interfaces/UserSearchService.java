@@ -13,6 +13,7 @@ public interface UserSearchService {
     public Mono<UserResponseDto> findUserById(UUID id);
     public Mono<UserResponseDto> findUserByEmail(String email);
     public Mono<UserResponseDto> findUserByUserId(String userId);
+    public Mono<UserResponseDto> findUserByUserInfoId(UUID userInfoId);
     public Mono<UserResponseDto> findUserByUserName(String userName);
     public Mono<UserResponseDto> findUserByDto(UserRequestDto dto);
     public Mono<Boolean> isExistUser(String email);

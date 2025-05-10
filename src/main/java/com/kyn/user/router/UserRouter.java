@@ -18,16 +18,16 @@ public class UserRouter {
     private final UserHandler userHandler;
     @Bean
     public RouterFunction<ServerResponse> userRoutes() {
-        return RouterFunctions.route(RequestPredicates.POST("/user/create"), this.userHandler::createUser)
-                .andRoute(RequestPredicates.POST("/user/login"), this.userHandler::login)
-                .andRoute(RequestPredicates.POST("/user/isLogin"), this.userHandler::isLogin)
-                .andRoute(RequestPredicates.POST("/user/logout"), this.userHandler::logout)
-                .andRoute(RequestPredicates.POST("/user/addRole"), this.userHandler::addRole)
-                .andRoute(RequestPredicates.GET("/user/searchEmail/{email}"), this.userHandler::searchUserByEmail)
-                .andRoute(RequestPredicates.GET("/user/searchUserId/{userId}"), this.userHandler::searchUserByUserId)
-                .andRoute(RequestPredicates.GET("/user/searchUserName/{userName}"), this.userHandler::searchUserByUserName)
-                .andRoute(RequestPredicates.GET("/user/searchId/{id}"), this.userHandler::searchUserById)
-                .andRoute(RequestPredicates.POST("/user/getExpirationTime"), this.userHandler::getExpirationTime);
+        return RouterFunctions.route(RequestPredicates.POST("/create"), this.userHandler::createUser)
+                .andRoute(RequestPredicates.POST("/login"), this.userHandler::login)
+                .andRoute(RequestPredicates.POST("/logout"), this.userHandler::logout)
+                .andRoute(RequestPredicates.POST("/isLogin"), this.userHandler::isLogin)
+                .andRoute(RequestPredicates.POST("/addRole"), this.userHandler::addRole)
+                .andRoute(RequestPredicates.GET("/searchEmail/{email}"), this.userHandler::searchUserByEmail)
+                .andRoute(RequestPredicates.GET("/searchUserId/{userId}"), this.userHandler::searchUserByUserId)
+                .andRoute(RequestPredicates.GET("/searchUserName/{userName}"), this.userHandler::searchUserByUserName)
+                .andRoute(RequestPredicates.GET("/searchId/{id}"), this.userHandler::searchUserById)
+                .andRoute(RequestPredicates.POST("/getExpirationTime"), this.userHandler::getExpirationTime);
     }
     
 }
