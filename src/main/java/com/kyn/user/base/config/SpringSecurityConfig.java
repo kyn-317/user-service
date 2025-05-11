@@ -41,7 +41,9 @@ public class SpringSecurityConfig {
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
-                .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll())
+                .authorizeExchange(exchanges -> exchanges
+                    .pathMatchers("/logout").permitAll()
+                    .anyExchange().permitAll())
                 .addFilterAt(jwtAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .build();
