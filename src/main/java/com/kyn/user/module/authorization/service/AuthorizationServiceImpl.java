@@ -27,9 +27,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     @Override
     public Mono<UserAuthDto> addUserAuth(UserAuthDto dto) {
         return userAuthRepository.findByUserInfoIdAndRole(dto.getUserInfoId(), dto.getRole())
-                            .switchIfEmpty(Mono.defer(() -> userAuthRepository.
-                            save(UserAuthEntityDtoMapper.userAuthEntityToCreate(dto, "system"))))
-                                        .map(UserAuthEntityDtoMapper::userAuthEntityToDto);
+                            .switchIfEmpty(userAuthRepository.
+                            save(UserAuthEntityDtoMapper.userAuthEntityToCreate(dto, "system")))
+                            .map(UserAuthEntityDtoMapper::userAuthEntityToDto);
     }
     // remove user auth
     @Override
